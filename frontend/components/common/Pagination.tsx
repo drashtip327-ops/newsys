@@ -1,0 +1,5 @@
+import Icon from './Icon';
+export default function Pagination({ total, all, page, size, onPage, onSize, noun }: { total: number; all: number; page: number; size: number; onPage: (page: number) => void; onSize: (size: number) => void; noun: string }) {
+  const pages = Math.max(1, Math.ceil(total / size));
+  return <div className="pagination"><span role="status">Showing <strong>{total ? (page - 1) * size + 1 : 0}–{Math.min(page * size, total)}</strong> of {total} {noun}{total !== all && ` (${all} total)`}</span><div className="pagination-controls"><label>Rows<select value={size} onChange={e => onSize(Number(e.target.value))}>{[10, 25, 50].map(n => <option key={n}>{n}</option>)}</select></label><button className="square-button" aria-label="Previous page" disabled={page <= 1} onClick={() => onPage(page - 1)}><Icon name="chevron" style={{ transform: 'rotate(180deg)' }} /></button><span>{page} / {pages}</span><button className="square-button" aria-label="Next page" disabled={page >= pages} onClick={() => onPage(page + 1)}><Icon name="chevron" /></button></div></div>;
+}

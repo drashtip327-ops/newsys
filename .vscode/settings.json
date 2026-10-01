@@ -1,0 +1,5 @@
+{
+  "terminal.integrated.env.windows": {
+    "PATH": "C:\\Users\\drash\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;D:\\ai-invoice-practical\\.tools\\bin;${env:PATH}"
+  }
+}
