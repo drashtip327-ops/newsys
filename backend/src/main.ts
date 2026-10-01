@@ -17,6 +17,11 @@ export async function createApp() {
 }
 async function bootstrap() {
   const app = await createApp();
-  await app.listen(Number(process.env.PORT ?? 3001), process.env.HOST ?? '0.0.0.0');
+
+  const port = Number(process.env.PORT) || 3000;
+
+  await app.listen(port, '0.0.0.0');
+
+  console.log(`Backend running on port ${port}`);
 }
 if (require.main === module) void bootstrap();
