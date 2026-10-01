@@ -28,9 +28,9 @@ export class PaymentsService {
     }
   }
   create(dto: CreatePaymentDto, role: Role) { return this.perform(() => createPayment(this.state(dto), role, dto.payment)); }
-  approve(id: string, dto: StateDto, role: Role) { return this.perform(() => approvePayment(this.state(dto), role, id, this.settings.get().config)); }
-  reject(id: string, dto: RejectPaymentDto, role: Role) { return this.perform(() => rejectPayment(this.state(dto), role, id, dto.comment, this.settings.get().config)); }
-  resubmit(id: string, dto: UpdatePaymentDto, role: Role) { return this.perform(() => resubmitPayment(this.state(dto), role, id, dto.payment, this.settings.get().config)); }
+  async approve(id: string, dto: StateDto, role: Role) { const config = (await this.settings.get()).config; return this.perform(() => approvePayment(this.state(dto), role, id, config)); }
+  async reject(id: string, dto: RejectPaymentDto, role: Role) { const config = (await this.settings.get()).config; return this.perform(() => rejectPayment(this.state(dto), role, id, dto.comment, config)); }
+  async resubmit(id: string, dto: UpdatePaymentDto, role: Role) { const config = (await this.settings.get()).config; return this.perform(() => resubmitPayment(this.state(dto), role, id, dto.payment, config)); }
   summary(dto: StateDto) { return calculateSummary(this.state(dto).payments); }
   audit(dto: StateDto) { return newestLogs(this.state(dto).auditLogs); }
   list(dto: ListPaymentsDto) {

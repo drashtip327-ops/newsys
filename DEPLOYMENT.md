@@ -1,24 +1,34 @@
-# Vercel deployment
+# Vercel production deployment
 
-The frontend is configured for Vercel. Login requires the NestJS backend, which currently needs a persistent Node server. A Vercel-only deployment requires migrating settings and sessions to external storage first.
+Both projects deploy from https://github.com/drashtip327-ops/newsys on the main branch.
 
-## Frontend on Vercel, backend on a persistent server
+| Service | Vercel project | Root directory | Live URL |
+| --- | --- | --- | --- |
+| Frontend | newsys | . | https://newsys-chi.vercel.app |
+| Backend | newsys-vsx6 | backend | https://newsys-vsx6.vercel.app |
 
-1. Upload the application files to GitHub. The checkout at `D:\section5\section5` currently contains only `.gitattributes`; the application is one directory above it. Include frontend, backend, shared, scripts, tests, package.json, package-lock.json, vercel.json, and Section5_Seed_Data.json. Exclude node_modules, .next, dist, local environment files and backend/data.
-2. Deploy the backend using Node 24 and the repository root. Build: `npm ci && npm run build --workspace backend`. Start: `npm start --workspace backend`.
-3. Set backend environment variables: `NODE_ENV=production`, `HOST=0.0.0.0`, the host-provided `PORT`, `FRONTEND_ORIGIN=https://YOUR-PROJECT.vercel.app`, and `SETTINGS_FILE=/YOUR-PERSISTENT-DISK/settings.json`. Mount a persistent disk there. Run one backend instance: sessions are in memory and settings use one JSON file. Backend restarts sign everyone out.
-4. Import `drashtip327-ops/section5` in Vercel. Root Directory: `./` (repository root). Framework: Next.js. Node.js: 24.x. The included vercel.json sets Install Command `npm ci`, Build Command `npm run build:frontend`, Output Directory `frontend/.next`.
-5. Add Vercel environment variable `BACKEND_URL=https://YOUR-BACKEND-HOST` without `/api`. Leave `NEXT_PUBLIC_API_URL` unset. Add BACKEND_URL for every deployment environment you use, then deploy. Changing it requires rebuilding.
-6. Verify login for all roles, request creation and approvals, MD settings/permissions, and logout. Restart the backend to verify settings persistence. Payment records remain local to each browser.
+The frontend configuration is in the root vercel.json. It builds Next.js with npm run build:frontend and uses frontend/.next as the output. Its production BACKEND_URL is https://newsys-vsx6.vercel.app. Leave NEXT_PUBLIC_API_URL unset. Browser requests use /api on the frontend domain; Next.js rewrites them to the backend, keeping authentication cookies on the frontend domain.
 
-## How the code works
+The backend configuration is backend/vercel.json. It installs the root npm workspace dependencies, compiles NestJS with tsc, and runs backend/api/index.js as a Vercel Function. The entry point loads compiled JavaScript to preserve Nest dependency injection metadata. FRONTEND_ORIGIN is https://newsys-chi.vercel.app. Cookies are Secure, HttpOnly and SameSite=Lax in production. The public readiness endpoint is /api/health and checks shared storage access.
 
-The browser calls `/api` on the frontend's own domain. Rewrites in `frontend/next.config.ts` forward requests to BACKEND_URL. Login cookies return through that same domain, avoiding cross-site cookie problems. Production cookies are HttpOnly and Secure. Locally the backend URL defaults to http://localhost:3001, so npm run dev still works.
+The private Vercel Blob store newsys-private is connected only to the backend production environment. Vercel supplies BLOB_READ_WRITE_TOKEN; never commit or expose it to the frontend. Sessions, workflow settings and permissions live in private blobs and survive backend deployments. Reads bypass the Blob CDN cache so permission updates and logout revocation are immediate. Settings fields have separate keys so a configuration update cannot overwrite concurrent permission changes. Sessions expire after eight hours. Redis REST storage is also supported when KV_REST_API_URL and KV_REST_API_TOKEN are supplied and Blob is not configured.
 
-## Everything on Vercel
+Local development retains the existing in-memory sessions and settings JSON file. Payment records retain the original browser-local snapshot model: the backend validates and processes snapshots, rather than storing a shared payments database.
 
-Replace in-memory sessions and local settings JSON with durable shared storage and adapt the backend entry point to Vercel Functions. Using `/tmp` would lose settings. A storage provider/account must be selected before implementing this option. No cloud services have been provisioned or deployed yet.
+## Deploy and verify
 
-Demo credentials remain employee/employee@123, manager/manager@123, md/md@123. The application accepts browser-held payment snapshots and is a demonstration, not a shared financial database.
+Vercel projects are connected to the GitHub repository. Push main to trigger deployments of both services. For a manual deployment from the repository root:
 
-References: [Next.js on Vercel](https://vercel.com/docs/frameworks/full-stack/nextjs), [Monorepos](https://vercel.com/docs/monorepos), [Function limits](https://vercel.com/docs/functions/limitations).
+```sh
+vercel link --yes --project newsys-vsx6
+vercel deploy --prod --yes --local-config backend/vercel.json
+vercel link --yes --project newsys
+vercel deploy --prod --yes
+npm run test:production
+```
+
+Run npm test and npm run lint before deploying. The production test checks public frontend HTML, both health endpoints, API forwarding, role logins, cookies, session sharing, creation and approvals, audit, settings write/read/restore, origin protection and logout. Its payment changes are held in test snapshots. It temporarily changes one configuration value and restores it in a finally block. Override FRONTEND_URL and BACKEND_URL to check other environments.
+
+Demo credentials: employee / employee@123, manager / manager@123, md / md@123.
+
+Verified on October 1, 2026: both production builds, 25 local tests, lint, and the production verification script passed.

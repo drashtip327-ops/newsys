@@ -12,8 +12,8 @@ class PermissionsDto { @IsObject() permissions!: Permissions; }
 @Controller('settings')
 export class SettingsController {
   constructor(private readonly service: SettingsService) {}
-  @RequirePage('config') @Get('config') config() { return this.service.get().config; }
+  @RequirePage('config') @Get('config') async config() { return (await this.service.get()).config; }
   @RequirePage('config') @Post('config') saveConfig(@Body() dto: ConfigDto) { return this.service.updateConfig(dto); }
-  @RequirePage('permissions') @Get('permissions') permissions() { return this.service.get().permissions; }
+  @RequirePage('permissions') @Get('permissions') async permissions() { return (await this.service.get()).permissions; }
   @RequirePage('permissions') @Post('permissions') savePermissions(@Body() dto: PermissionsDto) { return this.service.updatePermissions(dto.permissions); }
 }

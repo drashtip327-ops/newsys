@@ -6,7 +6,8 @@ import { AuthController } from './modules/auth/auth.controller';
 import { SettingsService } from './modules/settings/settings.service';
 import { SettingsController } from './modules/settings/settings.controller';
 import { AccessGuard } from './common/guards/access.guard';
+import { HealthController } from './health.controller';
 
 @Global()
-@Module({ imports: [PaymentsModule], controllers: [AuthController, SettingsController], providers: [AuthService, SettingsService, { provide: APP_GUARD, useClass: AccessGuard }], exports: [SettingsService] })
+@Module({ imports: [PaymentsModule], controllers: [AuthController, SettingsController, HealthController], providers: [AuthService, SettingsService, { provide: APP_GUARD, useClass: AccessGuard }], exports: [SettingsService] })
 export class AppModule {}

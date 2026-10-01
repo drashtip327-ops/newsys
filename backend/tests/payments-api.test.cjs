@@ -121,7 +121,7 @@ test('MD configuration is validated, persistent, and used by payment rules', asy
   assert.equal((await api('/settings/config', 'MD', config)).status, 201);
   assert.deepEqual(JSON.parse(fs.readFileSync(process.env.SETTINGS_FILE, 'utf8')).config, config);
   const { SettingsService } = require('../dist/backend/src/modules/settings/settings.service.js');
-  assert.deepEqual(new SettingsService().get().config, config);
+  assert.deepEqual((await new SettingsService().get()).config, config);
   let state = await seed();
   assert.equal((await request('/PR-001/approve', 'Manager', { state })).data.payments[0].status, 'Pending_MD');
   const boundary = (await request('', 'Employee', { state, payment: { ...payment, amount: 10000 } })).data;
