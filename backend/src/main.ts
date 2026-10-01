@@ -18,9 +18,12 @@ export async function createApp() {
 async function bootstrap() {
   const app = await createApp();
 
-  const port = Number(process.env.PORT);
+  // const port = Number(process.env.PORT);
 
-  await app.listen(port, '0.0.0.0');
+  // await app.listen(port, '0.0.0.0');
+  const port = process.env.BACKEND_PORT || 3001;
+
+await app.listen(port, '0.0.0.0');
 
   console.log(`Backend running on port ${port}`);
 }

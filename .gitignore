@@ -6,3 +6,12 @@ backend/data/
 .test-build/
 *.tsbuildinfo
 .env*.local
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.next/
+.vercel/
+coverage/
+*.log
