@@ -18,10 +18,14 @@ export async function createApp() {
 async function bootstrap() {
   const app = await createApp();
 
-  const port = Number(process.env.PORT) || 3000;
+  const port = Number(process.env.PORT);
 
   await app.listen(port, '0.0.0.0');
 
   console.log(`Backend running on port ${port}`);
 }
-if (require.main === module) void bootstrap();
+
+if (require.main === module) {
+  void bootstrap();
+}
+
